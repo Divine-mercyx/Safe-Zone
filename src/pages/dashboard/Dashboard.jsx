@@ -8,6 +8,7 @@ import { Feed } from "../../components/Feed.jsx";
 import { Element, Link as ScrollLink } from "react-scroll";
 import {useAuthStore} from "../../store/authStore.js";
 import {MakeReport} from "../../components/MakeReport.jsx";
+import {useNavigate} from "react-router-dom";
 
 export const Dashboard = () => {
     const username = localStorage.getItem("username") || "Phoenix";
@@ -20,9 +21,10 @@ export const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const clearToken = useAuthStore(state => state.clearToken);
     const token = useAuthStore(state => state.token);
+    const navigate = useNavigate();
 
 
-    if (!token) {window.location.href = "/login";}
+    if (!token) {navigate("/login");}
 
 
 
