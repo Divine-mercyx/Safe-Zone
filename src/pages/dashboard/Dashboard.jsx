@@ -4,11 +4,9 @@ import {
     ChevronDownIcon, ChevronUpIcon, BellIcon, InboxIcon
 } from "@heroicons/react/24/outline";
 import axios from "axios";
-import card1 from '../../assets/download.jpeg'
 import { Feed } from "../../components/Feed.jsx";
 import { Element, Link as ScrollLink } from "react-scroll";
 import {useAuthStore} from "../../store/authStore.js";
-import {PlusIcon} from "@heroicons/react/24/solid/index.js";
 import {MakeReport} from "../../components/MakeReport.jsx";
 
 export const Dashboard = () => {
