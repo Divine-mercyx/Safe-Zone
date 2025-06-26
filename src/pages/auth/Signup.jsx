@@ -51,7 +51,7 @@ export const Signup = () => {
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const signupApi = "https://b12ead4a-5f33-4e5c-bb62-eb24eddd1579.mock.pstmn.io/signUp";
+    const signupApi = "https://safespace-s4hu.onrender.com/user/signUp";
     const locationChangingApi = "https://b12ead4a-5f33-4e5c-bb62-eb24eddd1579.mock.pstmn.io/updateLocation";
     const setToken = useAuthStore((state) => state.setToken);
 

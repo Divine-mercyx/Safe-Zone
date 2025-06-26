@@ -8,7 +8,7 @@ export const Login = () => {
     // const [latitude, setLatitude] = useState(null);
     // const [longitude, setLongitude] = useState(null);
     const setToken = useAuthStore(state => state.setToken);
-    const api = "";
+    const api = "https://safespace-s4hu.onrender.com/user/login";
     //
     // useEffect(() => {
     //     if ("geolocation" in navigator) {
