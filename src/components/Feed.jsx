@@ -1,32 +1,44 @@
-import {ChatBubbleLeftEllipsisIcon, HandThumbDownIcon, HandThumbUpIcon} from "@heroicons/react/24/outline/index.js";
+import { ChatBubbleLeftEllipsisIcon, HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/outline/index.js";
 import React from "react";
 
 export const Feed = (props) => {
     return (
-        <div className="bg-gray-900 p-4 w-160 mt-7 rounded-lg shadow border-1 border-gray-700 hover:shadow-md transition flex flex-col justify-between">
-            <div className="flex w-full">
-                <div className=" h-10 w-1/12">
-                    <div className="w-9 h-9 rounded-full border-1 border-blue-400 bg-gray-600 mb-4"></div>
+        <div className="bg-white dark:bg-gray-900 p-6 w-150 mt-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 transition hover:shadow-xl flex flex-col gap-4">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-full border-2 border-blue-400 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-lg font-bold text-blue-500">
+                    {/* Optionally, show first letter of username */}
+                    {props.username ? props.username[0].toUpperCase() : "U"}
                 </div>
-                <div className="h-9 w-2/12 flex items-center justify-centr">
-                    <h3 className="text-white font-semibold">{props.username}</h3>
-                </div>
-                <div className="h-9 w-9/12 flex items-center justify-cente">
-                    <p className="text-gray-400 text-end text-sm">
-                        12:34 thursday, 12 October 2023
-                    </p>
+                <div className="flex-1">
+                    <h3 className="text-gray-900 dark:text-white font-semibold text-base">{props.username}</h3>
+                    <p className="text-gray-400 text-xs">12:34 Thursday, 12 October 2023</p>
                 </div>
             </div>
-            <div className="w-full mb-6 mt-4">
-                <h1 className="text-gray-300 font-medium">
-                    im reporting a suspicious activity near my location, please check it out, also i have attached a photo of the activity.
-                </h1>
+            <div className="mb-2">
+                <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed">
+                    I'm reporting a suspicious activity near my location. Please check it out. Also, I have attached a photo of the activity.
+                </p>
             </div>
-            <div className="w-full flex mt-auto">
-                <HandThumbUpIcon className="h-6 w-6 text-green-400 cursor-pointer hover:text-green-500 transition duration-200 mr-4" />
-                <HandThumbDownIcon className="h-6 w-6 text-red-400 cursor-pointer hover:text-red-500 transition duration-200 mr-4" />
-                <ChatBubbleLeftEllipsisIcon className="h-6 w-6 text-blue-400 cursor-pointer hover:text-blue-500 transition duration-200" />
+            {/* Optionally, show an image if available: */}
+            {/* {props.image && (
+                <div className="mb-2 flex justify-center">
+                    <img src={props.image} alt="Report" className="rounded-lg max-h-48 object-cover border border-gray-200 dark:border-gray-700" />
+                </div>
+            )} */}
+            <div className="flex items-center gap-6 mt-2">
+                <button className="flex items-center gap-1 text-green-500 hover:text-green-600 transition font-medium focus:outline-none">
+                    <HandThumbUpIcon className="h-6 w-6" />
+                    <span className="text-sm">Like</span>
+                </button>
+                <button className="flex items-center gap-1 text-red-500 hover:text-red-600 transition font-medium focus:outline-none">
+                    <HandThumbDownIcon className="h-6 w-6" />
+                    <span className="text-sm">Dislike</span>
+                </button>
+                <button className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition font-medium focus:outline-none">
+                    <ChatBubbleLeftEllipsisIcon className="h-6 w-6" />
+                    <span className="text-sm">Comment</span>
+                </button>
             </div>
         </div>
-    )
-}
+    );
+};

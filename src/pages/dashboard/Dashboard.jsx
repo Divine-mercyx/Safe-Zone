@@ -182,15 +182,24 @@ export const Dashboard = () => {
                             Report Feed <span style={{ fontSize: "15px" }} className="text-gray-400 ml-5 font-medium"><span className="text-green-400 text-2xl">. </span>near your {viewLocation}</span>
                         </h1>
                         <div className="border-t-1 border-gray-800 w-full"></div>
-                        { feeds.length > 0 ? (
-                            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {feeds.map((feed, index) => (
-                                    <Feed key={index} username={feed.username} />
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-gray-400 text-center mt-7">No reports available for {viewLocation}.</p>
-                        ) }
+                        {/*{ feeds.length > 0 ? (*/}
+                        {/*    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">*/}
+                        {/*        {feeds.map((feed, index) => (*/}
+                        {/*            <Feed key={index} username={feed.username} />*/}
+                        {/*        ))}*/}
+                        {/*    </div>*/}
+                        {/*) : (*/}
+                        {/*    <p className="text-gray-400 text-center mt-7">No reports available for {viewLocation}.</p>*/}
+                        {/*) }*/}
+
+                        {/*<div className="flex w-full">*/}
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                        {/*</div>*/}
                     </Element>
                 </div>
             </div>
