@@ -185,18 +185,13 @@ export const Signup = () => {
             setToken(data.token);
             localStorage.setItem("username", formData.username);
             if (latitude && longitude) {
-                console.log(latitude, longitude);
-                console.log(data.token)
+                const token = data.token;
                 await axios.post(
                     locationChangingApi,
-                    {latitude, longitude},
-                    {
-                        headers: {
-                            Authorization: `Bearer ${data.token}`
-                        }
-                    }
+                    {token, latitude, longitude},
                 );
             }
+            navigate("/")
         } catch (error) {
             if (error.response) {
                 console.error("Backend error:", error.response.data); // <-- Add this

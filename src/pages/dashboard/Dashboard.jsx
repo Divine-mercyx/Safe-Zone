@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 export const Dashboard = () => {
     const username = localStorage.getItem("username") || "Phoenix";
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const api = "https://safespace-s4hu.onrender.com/user/getLocations";
+    const api = "https://safespace-s4hu.onrender.com/user/getLocation";
     const [locations, setLocations] = useState([]);
     const [reportsOpen, setReportsOpen] = useState(false);
     const [viewLocation, setViewLocation] = useState("current");
@@ -35,14 +35,7 @@ export const Dashboard = () => {
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                const { data } = await axios.get(api,
-                    {
-                        withCredentials: true,
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
+                const { data } = await axios.post(api, { token });
                 setLocations([...data.locations]);
             } catch (error) {
                 console.error("Failed to fetch locations:", error);
