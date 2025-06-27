@@ -1,6 +1,6 @@
 import './style.css'
 import React, {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useAuthStore} from "../../store/authStore.js";
 
@@ -8,7 +8,8 @@ export const Login = () => {
     // const [latitude, setLatitude] = useState(null);
     // const [longitude, setLongitude] = useState(null);
     const setToken = useAuthStore(state => state.setToken);
-    const api = "https://safespace-s4hu.onrender.com/user/login";
+    const api = "https://safespace-s4hu.onrender.com/user/logIn";
+    const navigate = useNavigate();
     //
     // useEffect(() => {
     //     if ("geolocation" in navigator) {
@@ -43,13 +44,23 @@ export const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const {data} = await axios.post(api, formData);
+            const loginPayload = {
+                name: formData.username,
+                password: formData.password,
+            }
+            const {data} = await axios.post(api, loginPayload);
             setToken(data.token);
             localStorage.setItem("username", formData.username);
             setFormData({username: "", password: ""});
+            navigate("/")
         } catch (error) {
-            console.error(error);
-            alert("Login failed. Please check your credentials and try again.");
+            if (error.response) {
+                console.error("Backend error:", error.response.data); // <-- Add this
+                alert(error.response.data.message || "login failed. Please try again.");
+            } else {
+                console.error("Error during login:", error);
+                alert("login failed. Please try again.");
+            }
         }
     }
 

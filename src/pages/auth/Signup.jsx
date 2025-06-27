@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import {useAuthStore} from "../../store/authStore.js";
@@ -52,10 +52,11 @@ export const Signup = () => {
     const [longitude, setLongitude] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const signupApi = "https://safespace-s4hu.onrender.com/user/signUp";
-    const locationChangingApi = "https://b12ead4a-5f33-4e5c-bb62-eb24eddd1579.mock.pstmn.io/updateLocation";
+    const locationChangingApi = "https://safespace-s4hu.onrender.com/user/updateLocation";
     const setToken = useAuthStore((state) => state.setToken);
+    const navigate = useNavigate();
+    const token = useAuthStore(state => state.token);
 
-    // Addresses: [{ label, address, lat, lng, suggestions }]
     const [addresses, setAddresses] = useState([
         { label: "", address: "", lat: null, lng: null, suggestions: [] },
     ]);
@@ -170,28 +171,40 @@ export const Signup = () => {
         }
 
         const signupPayload = {
-            username: formData.username,
+            name: formData.username,
             password: formData.password,
-            keyLocation: addresses.map(({ label, address, lat, lng }) => ({
+            locations: addresses.map(({ label, address, lat, lng }) => ({
                 name: label,
                 latitude: lat,
                 longitude: lng,
             })),
         };
 
-        const currentLocationPayload = {
-            latitude: latitude,
-            longitude: longitude,
-        }
         try {
             const {data} = await axios.post(signupApi, signupPayload);
             setToken(data.token);
             localStorage.setItem("username", formData.username);
-            await axios.post(locationChangingApi, currentLocationPayload);
-            setFormData({ username: "", password: "", confirmPassword: "" });
+            if (latitude && longitude) {
+                console.log(latitude, longitude);
+                console.log(data.token)
+                await axios.post(
+                    locationChangingApi,
+                    {latitude, longitude},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${data.token}`
+                        }
+                    }
+                );
+            }
         } catch (error) {
-            console.error("Error during signup:", error);
-            alert("Signup failed. Please try again.");
+            if (error.response) {
+                console.error("Backend error:", error.response.data); // <-- Add this
+                alert(error.response.data.message || "Signup failed. Please try again.");
+            } else {
+                console.error("Error during signup:", error);
+                alert("Signup failed. Please try again.");
+            }
         }
     };
 

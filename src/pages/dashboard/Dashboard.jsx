@@ -5,28 +5,25 @@ import {
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { Feed } from "../../components/Feed.jsx";
-import { Element, Link as ScrollLink } from "react-scroll";
-import {useAuthStore} from "../../store/authStore.js";
-import {MakeReport} from "../../components/MakeReport.jsx";
-import {useNavigate} from "react-router-dom";
+import { Element } from "react-scroll";
+import { useAuthStore } from "../../store/authStore.js";
+import { MakeReport } from "../../components/MakeReport.jsx";
+import { useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
     const username = localStorage.getItem("username") || "Phoenix";
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const api = "https://35b50a5a-99ec-42d5-ab71-b01c2f09f63d.mock.pstmn.io/locations";
+    const api = "https://safespace-s4hu.onrender.com/user/getLocations";
     const [locations, setLocations] = useState([]);
     const [reportsOpen, setReportsOpen] = useState(false);
     const [viewLocation, setViewLocation] = useState("current");
-    const [feeds, setFeeds] = useState([]);
+    const [news, setNews] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const clearToken = useAuthStore(state => state.clearToken);
     const token = useAuthStore(state => state.token);
     const navigate = useNavigate();
-
-
-
-
-
+    const apiKey = "5e598ee9ae7248339e9fe3f70efb26cf";
+    const newsApi = `https://newsapi.org/v2/everything?q=crime&apiKey=${apiKey}`;
 
     const getGreeting = (name) => {
         const hour = new Date().getHours();
@@ -38,15 +35,33 @@ export const Dashboard = () => {
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                const { data } = await axios.get(api);
-                setLocations(["current", ...data.locations]);
+                const { data } = await axios.get(api,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+                setLocations([...data.locations]);
             } catch (error) {
                 console.error("Failed to fetch locations:", error);
             }
         };
+
+
+        const fetchFeeds = async () => {
+            try {
+                const { data } = await axios.get(newsApi);
+                setNews(data.articles.slice(4, 10));
+            } catch (error) {
+                console.error("Failed to fetch feeds:", error);
+            }
+        };
         fetchLocations();
-        if (!token) {navigate("/login");}
-    }, [token, navigate]);
+        fetchFeeds();
+        if (!token) navigate("/login");
+    }, [token, navigate, newsApi]);
+
 
     const handleViewLocationChange = (location) => {
         setViewLocation(location);
@@ -56,13 +71,13 @@ export const Dashboard = () => {
         clearToken();
         localStorage.removeItem("username");
         window.location.href = "/login";
-    }
+    };
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-tr bg-black">
+        <div className="flex min-h-screen bg-gradient-to-tr from-gray-900 via-black to-gray-800">
             {/* Sidebar */}
             <button
-                className="md:hidden absolute top-4 left-4 z-30 p-2 rounded bg-gray-800 shadow"
+                className="md:hidden fixed top-4 left-4 z-40 p-2 rounded bg-gray-800 shadow"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 aria-label="Toggle sidebar"
             >
@@ -73,9 +88,9 @@ export const Dashboard = () => {
 
             <div
                 className={`
-                    fixed md:static z-20 top-0 left-0 h-screen w-64 md:w-72
+                    fixed md:static z-30 top-0 left-0 h-full w-64 md:w-72
                     transition-transform duration-200
-                    border-r-1 border-gray-800
+                    border-r border-gray-800
                     ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
                     flex flex-col bg-gray-950 shadow-lg
                 `}
@@ -116,16 +131,12 @@ export const Dashboard = () => {
                                 ))}
                             </div>
                         )}
-                        <ScrollLink
-                            to="feedSection"
-                            smooth={true}
-                            duration={500}
-                            offset={-80}
-                            className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto cursor-pointer"
+                        <a href="#report"
+                           className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto cursor-pointer"
                         >
                             <MapPinIcon className="h-4 mr-1 w-4" /> Go to Feed
-                        </ScrollLink>
-                        <a onClick={(e) => setIsModalOpen(true)} className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
+                        </a>
+                        <a onClick={() => setIsModalOpen(true)} className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto cursor-pointer">
                             <MapPinIcon className="h-4 mr-1 w-4" /> Make Report
                         </a>
                         <a href="#" className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
@@ -134,7 +145,7 @@ export const Dashboard = () => {
                         <a href="#" className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
                             <InboxIcon className="h-4 mr-1 w-4" /> Inbox
                         </a>
-                        <a href="#" onClick={() => logout()} className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
+                        <a href="#" onClick={logout} className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
                             <ArrowRightOnRectangleIcon className="h-5 w-5" /> Logout
                         </a>
                     </div>
@@ -143,77 +154,66 @@ export const Dashboard = () => {
 
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black opacity-40 z-10 md:hidden"
+                    className="fixed inset-0 bg-black opacity-40 z-20 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col p-6 h-screen overflow-y-auto">
-                <div className="w-full bg-black shadow rounded-lg p-8">
-                    <h1 className="text-2xl font-bold text-white mb-4">
+            <main className="flex-1 flex flex-col p-2 sm:p-4 md:p-8 h-screen overflow-y-auto">
+                <div className="w-full bg-black/90 shadow rounded-lg p-4 sm:p-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                         {getGreeting(username)}
                     </h1>
                     <p className="text-gray-300 mb-6">
                         <span className="font-semibold">Hint: </span>you can manage your reports and locations.
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 mb-6 gap-6">
-                        <div style={{ backgroundImage: "url('src/assets/download.jpeg')",  backgroundPosition: 'center', backgroundRepeat: "no-repeat", backgroundSize: "cover"}} className="bg-orage-900 h-70 rounded-lg shadow hover:shadow-md transition flex flex-col justify-between">
-                            <div className="w-full bg-gray-700 p-4 rounded-t-lg h-40 mt-auto opacity-75">
-                                <h1 className="text-white font-medium">
-                                    im reporting a suspicious activity near my location, please check it out, also i have attached a photo of the activity.
-                                </h1>
+                    {/* News Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-10 gap-4 sm:gap-6">
+                        {news.map((article, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    backgroundImage: `url(${article.urlToImage})`,
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: "no-repeat",
+                                    backgroundSize: "cover"
+                                }}
+                                className="bg-orange-900 min-h-[180px] rounded-xl shadow transition transform hover:scale-105 hover:brightness-110 hover:shadow-lg flex flex-col justify-end cursor-pointer duration-200 overflow-hidden"
+                            >
+                                <div className="w-full bg-gray-900/80 p-4 rounded-t-xl">
+                                    <h1 className="text-white font-medium text-sm sm:text-base line-clamp-3">
+                                        {article.description}
+                                    </h1>
+                                </div>
                             </div>
-                        </div>
-
-                        <div style={{ backgroundImage: "url('src/assets/images.jpeg')",  backgroundPosition: 'center', backgroundRepeat: "no-repeat", backgroundSize: "cover"}} className="bg-orage-900 h-70 rounded-lg shadow hover:shadow-md transition flex flex-col justify-between">
-                            <div className="w-full bg-blue-700 p-4 rounded-t-lg h-40 mt-auto opacity-75">
-                                <h1 className="text-white font-medium">
-                                    im reporting a suspicious activity near my location, please check it out, also i have attached a photo of the activity.
-                                </h1>
-                            </div>
-                        </div>
-
-                        <div style={{ backgroundImage: "url('src/assets/flood.jpeg')",  backgroundPosition: 'center', backgroundRepeat: "no-repeat", backgroundSize: "cover"}} className="bg-orage-900 h-70 rounded-lg shadow hover:shadow-md transition flex flex-col justify-between">
-                            <div className="w-full bg-violet-700 p-4 rounded-t-lg h-40 mt-auto opacity-75">
-                                <h1 className="text-white font-medium">
-                                    im reporting a suspicious activity near my location, please check it out, also i have attached a photo of the activity.
-                                </h1>
-                            </div>
-                        </div>
-
+                        ))}
+                        <button className="bg-gray-800 rounded-xl shadow p-4 flex items-center justify-center hover:bg-gray-700 transition duration-200 min-h-[180px]">
+                            <span className="text-gray-400 text-sm">View More News</span>
+                        </button>
+                        <p id="report"></p>
                     </div>
 
+                    {/* Feed Section */}
                     <Element name="feedSection">
                         <h1 className="text-2xl font-bold text-white mb-4">
-                            Report Feed <span style={{ fontSize: "15px" }} className="text-gray-400 ml-5 font-medium"><span className="text-green-400 text-2xl">. </span>near your {viewLocation}</span>
+                            Report Feed <span style={{ fontSize: "15px" }} className="text-gray-400 ml-5 font-medium"><span className="text-green-400 text-2xl">. </span>near your {viewLocation === "current" ? "current location" : viewLocation}</span>
                         </h1>
-                        <div className="border-t-1 border-gray-800 w-full"></div>
-                        { feeds.length > 0 ? (
-                            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {feeds.map((feed, index) => (
-                                    <Feed key={index} username={feed.username} />
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-gray-400 text-center mt-7">No reports available for {viewLocation}.</p>
-                        ) }
-
-                        {/*<div className="flex w-full">*/}
-                        {/*    <Feed username={username} />*/}
-                        {/*    <Feed username={username} />*/}
-                        {/*    <Feed username={username} />*/}
-                        {/*    <Feed username={username} />*/}
-                        {/*    <Feed username={username} />*/}
-                        {/*    <Feed username={username} />*/}
-                        {/*</div>*/}
+                        <div className="border-t border-gray-800 w-full"></div>
+                        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                            <Feed username={username} />
+                        </div>
                     </Element>
                 </div>
-            </div>
-
+            </main>
 
             {isModalOpen && (
-                <MakeReport setIsModalOpen={setIsModalOpen}  />
+                <MakeReport setIsModalOpen={setIsModalOpen} />
             )}
         </div>
     );
