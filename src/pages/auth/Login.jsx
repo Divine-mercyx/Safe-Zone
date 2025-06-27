@@ -7,6 +7,7 @@ import {useAuthStore} from "../../store/authStore.js";
 export const Login = () => {
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
+    const [loading, setLoading] = useState(false); // Loader state
     const setToken = useAuthStore(state => state.setToken);
     const api = "https://safespace-s4hu.onrender.com/user/logIn";
     const navigate = useNavigate();
@@ -44,6 +45,7 @@ export const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // Start loader
         try {
             const loginPayload = {
                 name: formData.username,
@@ -57,12 +59,14 @@ export const Login = () => {
             navigate("/")
         } catch (error) {
             if (error.response) {
-                console.error("Backend error:", error.response.data); // <-- Add this
+                console.error("Backend error:", error.response.data);
                 alert(error.response.data.message || "login failed. Please try again.");
             } else {
                 console.error("Error during login:", error);
                 alert("login failed. Please try again.");
             }
+        } finally {
+            setLoading(false); // Stop loader
         }
     }
 
@@ -70,25 +74,34 @@ export const Login = () => {
         <div className="flex">
             <div className="w-1/2 mb-4 h-screen bg-[#2855d3] p-4">
                 <div className="mt-100 mb-17 w-80">
-                    <h1 className="text-center text-blue-50 font-bold text-3xl mb-4">Safe Zone</h1>
-                    <p className="text-center text-blue-100 text-1xl mb-4">Report. Validate. Stay Safe.</p>
+                    <h1 className="text-center text-blue-50 font-bold text-3xl mb-4">
+                        Safe Zone
+                    </h1>
+                    <p className="text-center text-blue-100 text-1xl mb-4">
+                        Report. Validate. Stay Safe.
+                    </p>
                 </div>
-
                 <div className="pl-15 w-80 mb-4">
-                    <h1 className="text-blue-50 text-1xl font-semibold">Community-Driven</h1>
-                    <p className="text-blue-100 text-sm">Built by and for African Communities</p>
+                    <h1 className="text-blue-50 text-1xl font-semibold">
+                        Community-Driven
+                    </h1>
+                    <p className="text-blue-100 text-sm">
+                        Built by and for African Communities
+                    </p>
                 </div>
-
                 <div className="pl-15 w-80 mb-10">
-                    <h1 className="text-blue-50 text-1xl font-semibold">Secure and anonymous</h1>
-                    <p className="text-blue-100 text-sm">Your safety and privacy are our priority</p>
+                    <h1 className="text-blue-50 text-1xl font-semibold">
+                        Secure and anonymous
+                    </h1>
+                    <p className="text-blue-100 text-sm">
+                        Your safety and privacy are our priority
+                    </p>
                 </div>
-
                 <div className="pl-15 w-110 mb-4">
-                    <p className="text-blue-100 text-sm">Empowering communities through safe incidet reporting</p>
+                    <p className="text-blue-100 text-sm">
+                        Empowering communities through safe incident reporting
+                    </p>
                 </div>
-
-
             </div>
             <div className="w-1/2 h-screen flex items-center justify-center bg-gray-100 p-4">
                 <div className="shadow rounded p-6 bg-gray-100  w-110 mx-auto mt-20">
@@ -112,6 +125,7 @@ export const Login = () => {
                                 onChange={handleInputChange}
                                 required
                                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={loading}
                             />
                         </div>
 
@@ -126,6 +140,7 @@ export const Login = () => {
                                 onChange={handleInputChange}
                                 required
                                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={loading}
                             />
                         </div>
 
@@ -136,11 +151,24 @@ export const Login = () => {
                         </div>
 
                         <div className="mb-4">
-                            <button style={{ fontSize: '14px' }} className="w-full bg-[#2855d3] text-white p-2 rounded hover:bg-blue-700 transition duration-200">
-                                Sign In
+                            <button
+                                style={{ fontSize: '14px' }}
+                                className="w-full bg-[#2855d3] text-white p-2 rounded hover:bg-blue-700 transition duration-200 flex items-center justify-center"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                                        </svg>
+                                        Logging in...
+                                    </>
+                                ) : (
+                                    "Sign In"
+                                )}
                             </button>
                         </div>
-
                         <div className="flex items-center mb-4">
                             <div className="flex-1 border-t border-gray-300"></div>
                             <span className="px-3 bg-gray-100 text-gray-500 text-sm">or</span>

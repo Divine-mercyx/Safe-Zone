@@ -237,7 +237,7 @@ export const Dashboard = () => {
                         <div className="border-t border-gray-800 w-full"></div>
                         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             { reports.map((report, index) => (
-                                <Feed key={index} username={username} />
+                                <Feed key={index} id={report.reportId} latitude={latitude} longitude={longitude} likes={report.likes} comments={report.comments} dislikes={report.dislikes} title={report.title} username={report.issuer} />
                             )) }
                         </div>
                     </Element>

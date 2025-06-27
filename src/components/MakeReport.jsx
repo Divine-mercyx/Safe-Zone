@@ -1,13 +1,16 @@
 import React from "react";
 import { useAuthStore } from "../store/authStore.js";
-import axios from "axios"; // adjust path as needed
+import axios from "axios";
 
 export const MakeReport = (props) => {
     const [reportType, setReportType] = React.useState("");
     const [title, setTitle] = React.useState("");
     const [imageFile, setImageFile] = React.useState(null);
     const [imagePreview, setImagePreview] = React.useState(null);
+    const [loading, setLoading] = React.useState(false); // Loader state
     const api = "https://safespace-s4hu.onrender.com/user/uploadImage";
+    const api2 = "https://safespace-s4hu.onrender.com/user/createReport";
+    const [isEmergency, setIsEmergency] = React.useState(false);
 
     const latitude = useAuthStore(state => state.latitude);
     const longitude = useAuthStore(state => state.longitude);
@@ -27,16 +30,9 @@ export const MakeReport = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!imageFile) return;
-
+        setLoading(true);
         const formData = new FormData();
-        formData.append("picture", imageFile);
-        // formData.append("title", title);
-        // formData.append("type", reportType);
-        // formData.append("latitude", latitude);
-        // formData.append("longitude", longitude);
-        // formData.append("time", new Date().toISOString());
-        // formData.append("username", username);
-
+        formData.append("image", imageFile);
         try {
             const { data } = await axios.post(api, formData, {
                 headers: {
@@ -44,11 +40,28 @@ export const MakeReport = (props) => {
                 }
             });
             console.log(data);
+            if (reportType === "Emergency Report") {
+                setIsEmergency(true);
+            }
+            const payload = {
+                title: title,
+                latitude: latitude,
+                longitude: longitude,
+                type: reportType,
+                username: username,
+                time: new Date().toISOString(),
+                pictureId: data,
+                isEmergency: isEmergency,
+            }
+
+            await axios.post(api2, payload);
+            alert("Report submitted successfully!");
+
         } catch (error) {
             console.error("Error submitting report:", error);
+            alert("Failed to submit report. Please try again.");
         }
-        console.log(formData);
-
+        setLoading(false);
         props.setIsModalOpen(false);
     };
 
@@ -65,6 +78,7 @@ export const MakeReport = (props) => {
                     onClick={() => props.setIsModalOpen(false)}
                     aria-label="Close"
                     type="button"
+                    disabled={loading}
                 >
                     &times;
                 </button>
@@ -76,6 +90,7 @@ export const MakeReport = (props) => {
                             type="button"
                             onClick={() => setReportType(report)}
                             className={`px-4 py-2 rounded-full border transition text-sm font-medium focus:outline-none ${reportType === report ? "bg-blue-600 text-white border-blue-600 shadow" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-700 dark:hover:text-white"}`}
+                            disabled={loading}
                         >
                             {report}
                         </button>
@@ -93,6 +108,7 @@ export const MakeReport = (props) => {
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                         className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+                        disabled={loading}
                     />
                 </div>
                 <div className="mb-4">
@@ -104,6 +120,7 @@ export const MakeReport = (props) => {
                         accept="image/*"
                         onChange={handleImageChange}
                         className="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={loading}
                     />
                 </div>
                 {imagePreview && (
@@ -113,9 +130,20 @@ export const MakeReport = (props) => {
                 )}
                 <button
                     type="submit"
-                    className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow"
+                    className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow flex items-center justify-center"
+                    disabled={loading}
                 >
-                    Make Report
+                    {loading ? (
+                        <>
+                            <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                            </svg>
+                            Submitting...
+                        </>
+                    ) : (
+                        "Make Report"
+                    )}
                 </button>
             </form>
         </div>

@@ -51,6 +51,7 @@ export const Signup = () => {
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false); // Loader state
     const signupApi = "https://safespace-s4hu.onrender.com/user/signUp";
     const locationChangingApi = "https://safespace-s4hu.onrender.com/user/updateLocation";
     const setToken = useAuthStore((state) => state.setToken);
@@ -160,7 +161,8 @@ export const Signup = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        if (loading) return; // Prevent double submit
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
             return;
@@ -169,6 +171,8 @@ export const Signup = () => {
             alert("Password must be at least 6 characters long!");
             return;
         }
+
+        setLoading(true); // Start loader
 
         const signupPayload = {
             name: formData.username,
@@ -194,12 +198,14 @@ export const Signup = () => {
             navigate("/")
         } catch (error) {
             if (error.response) {
-                console.error("Backend error:", error.response.data); // <-- Add this
+                console.error("Backend error:", error.response.data);
                 alert(error.response.data.message || "Signup failed. Please try again.");
             } else {
                 console.error("Error during signup:", error);
                 alert("Signup failed. Please try again.");
             }
+        } finally {
+            setLoading(false); // Stop loader
         }
     };
 
@@ -252,14 +258,14 @@ export const Signup = () => {
                     </p>
                     <div className="w-full bg-amber-100 p-2 mb-4 border-1 border-amber-400 rounded opacity-60">
                         <p id="welcomeText" className="text-center text-gray-900">
-              <span className="text-medium text-amber-600">
-                Badge holders:
-              </span>{" "}
+                            <span className="text-medium text-amber-600">
+                                Badge holders:
+                            </span>{" "}
                             Login for enhanced verification features.
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={e => { e.preventDefault(); setIsModalOpen(true); }}>
                         <div className="mb-4">
                             <input
                                 id="username"
@@ -271,6 +277,7 @@ export const Signup = () => {
                                 onChange={handleInputChange}
                                 required
                                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={loading}
                             />
                         </div>
                         <div className="mb-4">
@@ -284,6 +291,7 @@ export const Signup = () => {
                                 onChange={handleInputChange}
                                 required
                                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={loading}
                             />
                         </div>
                         <div className="mb-4">
@@ -297,14 +305,15 @@ export const Signup = () => {
                                 onChange={handleInputChange}
                                 required
                                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={loading}
                             />
                         </div>
                         <div className="mb-4">
                             <button
-                                type="button"
+                                type="submit"
                                 style={{ fontSize: "14px" }}
-                                onClick={() => setIsModalOpen(true)}
                                 className="w-full bg-[#2855d3] text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+                                disabled={loading}
                             >
                                 Next
                             </button>
@@ -312,8 +321,8 @@ export const Signup = () => {
                         <div className="flex items-center mb-4">
                             <div className="flex-1 border-t border-gray-300"></div>
                             <span className="px-3 bg-gray-100 text-gray-500 text-sm">
-                or
-              </span>
+                                or
+                            </span>
                             <div className="flex-1 border-t border-gray-300"></div>
                         </div>
                         <div className="mb-8">
@@ -321,6 +330,7 @@ export const Signup = () => {
                                 type="button"
                                 style={{ fontSize: "14px" }}
                                 className="w-full bg-gray-100 text-gray-600 p-2 rounded border border-gray-300 hover:bg-gray-100 transition duration-200"
+                                disabled={loading}
                             >
                                 Sign in with Google
                             </button>
@@ -368,19 +378,32 @@ export const Signup = () => {
                             type="button"
                             onClick={handleAddAddress}
                             className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4"
+                            disabled={loading}
                         >
                             <PlusIcon className="h-5 w-5" /> Add another address
                         </button>
                         <button
-                            type="submit"
+                            type="button"
                             onClick={handleSubmit}
-                            className="w-full bg-[#2855d3] text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+                            className="w-full bg-[#2855d3] text-white p-2 rounded hover:bg-blue-700 transition duration-200 flex items-center justify-center"
+                            disabled={loading}
                         >
-                            Create Account
+                            {loading ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                                    </svg>
+                                    Creating account...
+                                </>
+                            ) : (
+                                "Create Account"
+                            )}
                         </button>
                         <button
                             className="mt-4 bg-gray-300 px-4 py-2 rounded"
                             onClick={() => setIsModalOpen(false)}
+                            disabled={loading}
                         >
                             Close
                         </button>
