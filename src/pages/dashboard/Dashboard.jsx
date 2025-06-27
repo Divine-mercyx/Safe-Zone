@@ -67,8 +67,10 @@ export const Dashboard = () => {
             console.error("Latitude and longitude must be numbers", lat, lng);
             return;
         }
+        console.log(typeof latitude);
         try {
-            const { data } = await axios.post(REPORTS_API, { latitude: lat, longitude: lng });
+            const { data } = await axios.post(REPORTS_API, { latitude: `${lat}`, longitude: `${lng}` });
+            console.log(data);
             setReports(data);
         } catch (error) {
             console.error("Failed to fetch reports:", error);
