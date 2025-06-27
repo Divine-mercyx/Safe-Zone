@@ -24,7 +24,6 @@ export const Dashboard = () => {
     const navigate = useNavigate();
 
 
-    if (!token) {navigate("/login");}
 
 
 
@@ -46,7 +45,8 @@ export const Dashboard = () => {
             }
         };
         fetchLocations();
-    }, []);
+        if (!token) {navigate("/login");}
+    }, [token, navigate]);
 
     const handleViewLocationChange = (location) => {
         setViewLocation(location);
