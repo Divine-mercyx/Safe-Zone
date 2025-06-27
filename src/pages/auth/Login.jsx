@@ -5,27 +5,28 @@ import axios from "axios";
 import {useAuthStore} from "../../store/authStore.js";
 
 export const Login = () => {
-    // const [latitude, setLatitude] = useState(null);
-    // const [longitude, setLongitude] = useState(null);
+    const [latitude, setLatitude] = useState(null);
+    const [longitude, setLongitude] = useState(null);
     const setToken = useAuthStore(state => state.setToken);
     const api = "https://safespace-s4hu.onrender.com/user/logIn";
     const navigate = useNavigate();
-    //
-    // useEffect(() => {
-    //     if ("geolocation" in navigator) {
-    //         navigator.geolocation.getCurrentPosition(
-    //             position => {
-    //                 setLatitude(position.coords.latitude);
-    //                 setLongitude(position.coords.longitude);
-    //             },
-    //             error => {
-    //                 console.error(error);
-    //             }
-    //         );
-    //     } else {
-    //         console.error("Geolocation is not supported by this browser.");
-    //     }
-    // }, []);
+    const setLocation = useAuthStore(state => state.setLocation);
+
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    setLatitude(position.coords.latitude);
+                    setLongitude(position.coords.longitude);
+                },
+                error => {
+                    console.error(error);
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    }, []);
 
     const userData = {
         username: '',
@@ -51,6 +52,7 @@ export const Login = () => {
             const {data} = await axios.post(api, loginPayload);
             setToken(data.token);
             localStorage.setItem("username", formData.username);
+            setLocation(latitude, longitude);
             setFormData({username: "", password: ""});
             navigate("/")
         } catch (error) {

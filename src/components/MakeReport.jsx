@@ -1,51 +1,69 @@
 import React from "react";
+import { useAuthStore } from "../store/authStore.js"; // adjust path as needed
 
 export const MakeReport = (props) => {
     const [reportType, setReportType] = React.useState("");
+    const [title, setTitle] = React.useState("");
+    const [imageFile, setImageFile] = React.useState(null);
     const [imagePreview, setImagePreview] = React.useState(null);
 
-    const reports = [
-        "Flood Report",
-        "Power Outage Report",
-        "Fire Report",
-        "Theft Report",
-        "Violent Crime Report",
-        "Traffic Report",
-        "Emergency Report",
-        "other"
-    ];
+    const latitude = useAuthStore(state => state.latitude);
+    const longitude = useAuthStore(state => state.longitude);
+    const username = localStorage.getItem("username");
 
-    const handleClick = (report) => {
-        setReportType(report);
-    };
+    const reports = [
+        "Flood Report", "Power Outage Report", "Fire Report", "Theft Report",
+        "Violent Crime Report", "Traffic Report", "Emergency Report", "other"
+    ];
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            setImagePreview(URL.createObjectURL(file));
-        } else {
-            setImagePreview(null);
-        }
+        setImageFile(file || null);
+        setImagePreview(file ? URL.createObjectURL(file) : null);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!imageFile) return;
+
+        const formData = new FormData();
+        formData.append("picture", imageFile);
+        formData.append("title", title);
+        formData.append("type", reportType);
+        formData.append("latitude", latitude);
+        formData.append("longitude", longitude);
+        formData.append("time", new Date().toISOString());
+        formData.append("username", username);
+
+        // await axios.post("/api/report", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        console.log(formData);
+
+        props.setIsModalOpen(false);
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black opacity-60"></div>
-            <div className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-8 rounded-2xl shadow-2xl w-full max-w-md z-10">
+            <form
+                onSubmit={handleSubmit}
+                className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-8 rounded-2xl shadow-2xl w-full max-w-md z-10"
+            >
                 <button
                     style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
                     className="text-3xl text-gray-400 hover:text-gray-700 dark:hover:text-white focus:outline-none"
                     onClick={() => props.setIsModalOpen(false)}
                     aria-label="Close"
+                    type="button"
                 >
                     &times;
                 </button>
                 <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">Make a Report</h2>
                 <div className="flex flex-wrap gap-2 justify-center mb-6">
-                    {reports.map((report, index) => (
+                    {reports.map((report) => (
                         <button
-                            key={index}
-                            onClick={() => handleClick(report)}
+                            key={report}
+                            type="button"
+                            onClick={() => setReportType(report)}
                             className={`px-4 py-2 rounded-full border transition text-sm font-medium focus:outline-none ${reportType === report ? "bg-blue-600 text-white border-blue-600 shadow" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-blue-100 dark:hover:bg-blue-800 hover:text-blue-700 dark:hover:text-white"}`}
                         >
                             {report}
@@ -61,6 +79,8 @@ export const MakeReport = (props) => {
                         placeholder="Enter a title for your report"
                         type="text"
                         required
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
                         className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
                     />
                 </div>
@@ -80,10 +100,13 @@ export const MakeReport = (props) => {
                         <img src={imagePreview} alt="Preview" className="max-h-40 rounded-lg border border-gray-300 dark:border-gray-700 shadow" />
                     </div>
                 )}
-                <button className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow">
+                <button
+                    type="submit"
+                    className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow"
+                >
                     Make Report
                 </button>
-            </div>
+            </form>
         </div>
     );
 };
