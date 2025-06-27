@@ -1,11 +1,13 @@
 import React from "react";
-import { useAuthStore } from "../store/authStore.js"; // adjust path as needed
+import { useAuthStore } from "../store/authStore.js";
+import axios from "axios"; // adjust path as needed
 
 export const MakeReport = (props) => {
     const [reportType, setReportType] = React.useState("");
     const [title, setTitle] = React.useState("");
     const [imageFile, setImageFile] = React.useState(null);
     const [imagePreview, setImagePreview] = React.useState(null);
+    const api = "https://safespace-s4hu.onrender.com/user/uploadImage";
 
     const latitude = useAuthStore(state => state.latitude);
     const longitude = useAuthStore(state => state.longitude);
@@ -28,14 +30,23 @@ export const MakeReport = (props) => {
 
         const formData = new FormData();
         formData.append("picture", imageFile);
-        formData.append("title", title);
-        formData.append("type", reportType);
-        formData.append("latitude", latitude);
-        formData.append("longitude", longitude);
-        formData.append("time", new Date().toISOString());
-        formData.append("username", username);
+        // formData.append("title", title);
+        // formData.append("type", reportType);
+        // formData.append("latitude", latitude);
+        // formData.append("longitude", longitude);
+        // formData.append("time", new Date().toISOString());
+        // formData.append("username", username);
 
-        // await axios.post("/api/report", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        try {
+            const { data } = await axios.post(api, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+            console.log(data);
+        } catch (error) {
+            console.error("Error submitting report:", error);
+        }
         console.log(formData);
 
         props.setIsModalOpen(false);

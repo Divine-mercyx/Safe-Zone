@@ -63,15 +63,16 @@ export const Dashboard = () => {
 
 
     const fetchReports = useCallback(async (lat, lng) => {
-        if (typeof lat !== "number" || typeof lng !== "number") {
-            console.error("Latitude and longitude must be numbers", lat, lng);
-            return;
-        }
-        console.log(typeof latitude);
+        console.log(lat, lng);
+
         try {
-            const { data } = await axios.post(REPORTS_API, { latitude: `${lat}`, longitude: `${lng}` });
-            console.log(data);
+            const payload = {
+                latitude: lat,
+                longitude: lng,
+            };
+            const { data } = await axios.post(REPORTS_API, payload);
             setReports(data);
+            console.log("Fetched reports:", data);
         } catch (error) {
             console.error("Failed to fetch reports:", error);
             setReports([]);
@@ -85,7 +86,6 @@ export const Dashboard = () => {
         }
         fetchLocations();
         fetchNews();
-        console.log(latitude, longitude);
         if (latitude && longitude) {
             fetchReports(latitude, longitude);
         }
@@ -146,11 +146,10 @@ export const Dashboard = () => {
                         </button>
                         {reportsOpen && (
                             <div className="ml-8 mt-2 flex flex-col gap-2">
-                                {locations.map(location => (
+                                {locations.map((location, index) => (
                                     <a
                                         onClick={() => handleViewLocationChange(location.name, location.latitude, location.longitude)}
-                                        key={location.id ?? location.name}
-                                        href="#"
+                                        key={index}
                                         className="flex items-center gap-2 text-gray-300 rounded py-1 px-3 hover:bg-gray-800 transition"
                                     >
                                         <DocumentTextIcon className="h-4 w-4" /> {location.name}
@@ -216,7 +215,7 @@ export const Dashboard = () => {
                                 }}
                                 className="bg-orange-900 mt-4 min-h-[190px] rounded-xl shadow transition transform hover:scale-105 hover:brightness-110 hover:shadow-lg flex flex-col justify-end cursor-pointer duration-200 overflow-hidden"
                             >
-                                <div className="w-full bg-gray-900/80 p-4 rounded-t-xl">
+                                <div className="w-full bg-gray-900/60 min-h-[140px] p-4 rounded-t-xl">
                                     <h1 className="text-gray-200 font-medium text-sm sm:text-base line-clamp-3">
                                         {article.description}
                                     </h1>
@@ -238,7 +237,7 @@ export const Dashboard = () => {
                         <div className="border-t border-gray-800 w-full"></div>
                         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             { reports.map((report, index) => (
-                                <Feed username={username} />
+                                <Feed key={index} username={username} />
                             )) }
                         </div>
                     </Element>
