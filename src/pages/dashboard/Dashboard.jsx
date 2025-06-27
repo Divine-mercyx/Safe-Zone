@@ -37,6 +37,7 @@ export const Dashboard = () => {
             try {
                 const { data } = await axios.get(api,
                     {
+                        withCredentials: true,
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
