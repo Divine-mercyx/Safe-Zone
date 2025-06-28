@@ -60,7 +60,7 @@ export const Login = () => {
         } catch (error) {
             if (error.response) {
                 console.error("Backend error:", error.response.data);
-                alert(error.response.data.message || "login failed. Please try again.");
+                alert(error.response.data || "login failed. Please try again.");
             } else {
                 console.error("Error during login:", error);
                 alert("login failed. Please try again.");

@@ -16,10 +16,7 @@ export const MakeReport = (props) => {
     const longitude = useAuthStore(state => state.longitude);
     const username = localStorage.getItem("username");
 
-    const reports = [
-        "Flood Report", "Power Outage Report", "Fire Report", "Theft Report",
-        "Violent Crime Report", "Traffic Report", "Emergency Report", "other"
-    ];
+    const reports = ["FLOOD", "POWER OUTAGE", "FIRE", "THEFT", "VIOLENT CRIME", "TRAFFIC", "EMERGENCY", "OTHER"]
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -29,17 +26,23 @@ export const MakeReport = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!imageFile) return;
+        // if (!imageFile) return;
         setLoading(true);
         const formData = new FormData();
         formData.append("image", imageFile);
+        console.log(latitude, longitude);
         try {
-            const { data } = await axios.post(api, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                }
-            });
-            console.log(data);
+            let blobId;
+            if (imageFile) {
+                const {data} = await axios.post(api, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
+                blobId = data
+            }
+
+            console.log(blobId)
             if (reportType === "Emergency Report") {
                 setIsEmergency(true);
             }
@@ -50,9 +53,10 @@ export const MakeReport = (props) => {
                 type: reportType,
                 username: username,
                 time: new Date().toISOString(),
-                pictureId: data,
+                pictureId: blobId || "dog",
                 isEmergency: isEmergency,
             }
+            console.log(payload)
 
             await axios.post(api2, payload);
             alert("Report submitted successfully!");

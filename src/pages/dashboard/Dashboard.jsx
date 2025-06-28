@@ -9,6 +9,7 @@ import { Element } from "react-scroll";
 import { useAuthStore } from "../../store/authStore.js";
 import { MakeReport } from "../../components/MakeReport.jsx";
 import { useNavigate } from "react-router-dom";
+import {Inbox} from "../../components/Inbox.jsx";
 
 const NEWS_API_KEY = "5e598ee9ae7248339e9fe3f70efb26cf";
 const NEWS_API = `https://newsapi.org/v2/everything?q=crime&apiKey=${NEWS_API_KEY}`;
@@ -26,10 +27,13 @@ export const Dashboard = () => {
     const [reports, setReports] = useState([]);
     const clearToken = useAuthStore(state => state.clearToken);
     const token = useAuthStore(state => state.token);
-    const latitude = useAuthStore(state => state.latitude);
-    const longitude = useAuthStore(state => state.longitude);
+    const latitude = useAuthStore(state => state.latitude) || localStorage.getItem("latitude");
+    const longitude = useAuthStore(state => state.longitude) || localStorage.getItem("longitude");
     const clearLocation = useAuthStore(state => state.clearLocation);
     const navigate = useNavigate();
+    const [isInboxOpen, setIsInboxOpen] = useState(false);
+    const inboxApi = "https://safespace-s4hu.onrender.com/user/viewInbox";
+    const [inboxes, setInboxes] = useState([]);
 
     const getGreeting = useCallback((name) => {
         const hour = new Date().getHours();
@@ -40,8 +44,14 @@ export const Dashboard = () => {
 
     const fetchLocations = useCallback(async () => {
         try {
+            const payload = {
+                name: "current",
+                latitude,
+                longitude,
+            }
+            console.log(payload);
             const { data } = await axios.post(LOCATIONS_API, { token });
-            setLocations(Array.isArray(data) ? data : []);
+            setLocations(Array.isArray(data) ? [payload, ...data] : []);
         } catch (error) {
             console.error("Failed to fetch locations:", error);
             setLocations([]);
@@ -49,11 +59,25 @@ export const Dashboard = () => {
     }, [token]);
 
 
+    const fetchData = async () => {
+        try {
+            const payload = {
+                username: localStorage.getItem("username")
+            }
+            const { data } = await axios.post(inboxApi, payload);
+            setInboxes(data || []);
+        } catch (error) {
+            console.error("Error fetching inboxes:", error);
+            alert("Failed to fetch inboxes. Please try again later.");
+        }
+    }
+
+
 
     const fetchNews = useCallback(async () => {
         try {
             const { data } = await axios.get(NEWS_API);
-            setNews(data?.articles?.slice(4, 10) ?? []);
+            setNews(data?.articles?.slice(19, 28) ?? []);
         } catch (error) {
             console.error("Failed to fetch feeds:", error);
             setNews([]);
@@ -86,6 +110,7 @@ export const Dashboard = () => {
         }
         fetchLocations();
         fetchNews();
+        fetchData();
         if (latitude && longitude) {
             fetchReports(latitude, longitude);
         }
@@ -102,6 +127,8 @@ export const Dashboard = () => {
         localStorage.removeItem("username");
         navigate("/login");
     }, [clearToken]);
+
+
 
 
     return (
@@ -140,7 +167,7 @@ export const Dashboard = () => {
                             className="flex items-center justify-between w-full text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md"
                         >
                               <span className="flex items-center gap-3">
-                                <DocumentTextIcon className="h-5 w-5" /> Reports
+                                <DocumentTextIcon className="h-5 w-5" /> Reports Locations
                               </span>
                             {reportsOpen ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
                         </button>
@@ -172,7 +199,9 @@ export const Dashboard = () => {
                         <a href="#" className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
                             <BellIcon className="h-4 mr-1 w-4" /> Notifications
                         </a>
-                        <a href="#" className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
+                        <a
+                            onClick={() => setIsInboxOpen(true)}
+                            className="flex items-center gap-3 text-gray-200 rounded-lg py-2 px-4 font-medium transition hover:bg-gray-800 active:bg-gray-700 shadow-sm hover:shadow-md mt-auto">
                             <InboxIcon className="h-4 mr-1 w-4" /> Inbox
                         </a>
                         <a
@@ -199,8 +228,8 @@ export const Dashboard = () => {
                     <h1 className="text-1xl sm:text-2xl font-bold text-gray-200 mb-4">
                         {getGreeting(username)}
                     </h1>
-                    <p className="text-gray-400 mb-6">
-                        <span className="font-semibold">Hint: </span>you can manage your reports and locations.
+                    <p className="text-gray-300 mb-6">
+                        you can manage your reports and locations.
                     </p>
                     {/* News Cards */}
                     <div className="grid grid-cols-1 bg-gray-950 border-1 border-gray-800 p-6 rounded-sm sm:grid-cols-2 lg:grid-cols-3 mb-10 gap-4 sm:gap-6">
@@ -213,9 +242,9 @@ export const Dashboard = () => {
                                     backgroundRepeat: "no-repeat",
                                     backgroundSize: "cover"
                                 }}
-                                className="bg-orange-900 mt-4 min-h-[190px] rounded-xl shadow transition transform hover:scale-105 hover:brightness-110 hover:shadow-lg flex flex-col justify-end cursor-pointer duration-200 overflow-hidden"
+                                className="bg-orange-900 mt-4 min-h-[220px] rounded-xl shadow transition transform hover:scale-105 hover:brightness-110 hover:shadow-lg flex flex-col justify-end cursor-pointer duration-200 overflow-hidden"
                             >
-                                <div className="w-full bg-gray-900/60 min-h-[140px] p-4 rounded-t-xl">
+                                <div className="w-full bg-gray-900/60  p-4 rounded-t-xl">
                                     <h1 className="text-gray-200 font-medium text-sm sm:text-base line-clamp-3">
                                         {article.description}
                                     </h1>
@@ -237,7 +266,7 @@ export const Dashboard = () => {
                         <div className="border-t border-gray-800 w-full"></div>
                         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             { reports.map((report, index) => (
-                                <Feed key={index} id={report.reportId} latitude={latitude} longitude={longitude} likes={report.likes} comments={report.comments} dislikes={report.dislikes} title={report.title} username={report.issuer} />
+                                <Feed key={index} id={report.reportId} picture={report.picture} latitude={latitude} longitude={longitude} likes={report.likes} comments={report.comments} dislikes={report.dislikes} title={report.title} username={report.username} verified={report.verified} type={report.type} />
                             )) }
                         </div>
                     </Element>
@@ -245,6 +274,7 @@ export const Dashboard = () => {
             </main>
 
             {isModalOpen && <MakeReport setIsModalOpen={setIsModalOpen} />}
+            {isInboxOpen && <Inbox setIsInboxOpen={setIsInboxOpen} inboxes={inboxes} setInboxes={setInboxes} />}
         </div>
     );
 };

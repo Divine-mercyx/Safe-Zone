@@ -6,16 +6,17 @@ export const Feed = (props) => {
     const likeApi = "https://safespace-s4hu.onrender.com/user/like";
     const dislikeApi = "https://safespace-s4hu.onrender.com/user/dislike";
     const commentApi = "https://safespace-s4hu.onrender.com/user/comment";
-    const getCommentsApi = "https://safespace-s4hu.onrender.com/user/getComments";
+    const getCommentsApi = "https://safespace-s4hu.onrender.com/user/viewComments";
     const [reportId] = useState(props.id);
     const username = localStorage.getItem("username");
     const [like, setLike] = useState(props.likes.length);
     const [dislike, setDislike] = useState(props.dislikes.length);
     const [comment, setComment] = useState(props.comments.length);
-    const REPORTS_API = "https://safespace-s4hu.onrender.com/user/viewReport";
-    const [reports, setReports] = useState([]);
+    const url = props.picture
+        ? `data:image/jpeg;base64,${props.picture}`
+        : null;
 
-    // Modal and comment states
+
     const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
@@ -50,7 +51,7 @@ export const Feed = (props) => {
         setLoadingComments(true);
         try {
             const { data } = await axios.post(getCommentsApi, { reportId });
-            setComments(data.comments || []);
+            setComments(data || []);
         } catch (error) {
             setComments([]);
         }
@@ -68,15 +69,35 @@ export const Feed = (props) => {
                 comment: newComment
             };
             const { data } = await axios.post(commentApi, payload);
-            setComments(data.comments || []);
-            setComment(data.comments.length);
+            setComments(data);
+            setComment(data.length);
             setNewComment("");
+            console.log(data);
         } catch (error) {
             console.error("Error sending comment:", error);
             alert("Failed to send comment. Please try again.");
         }
         setSending(false);
     };
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            setLoadingComments(true);
+            try {
+                const { data } = await axios.post(getCommentsApi, { reportId });
+                setComments(data || []);
+            } catch (error) {
+                console.error("Error fetching comments:", error);
+                setComments([]);
+            }
+            setLoadingComments(false);
+        }
+        fetchComments();
+    }, []);
+
+    console.log(comments);
+
+
 
     return (
         <>
@@ -87,14 +108,14 @@ export const Feed = (props) => {
                         {props.username ? props.username[0].toUpperCase() : "U"}
                     </div>
                     <div className="flex-1">
-                        <h3 className="text-gray-900 dark:text-white font-semibold text-base">{props.username}</h3>
-                        <p className="text-gray-400 text-xs">12:34 Thursday, 12 October 2023</p>
+                        <h3 className="text-gray-900 mb-1 dark:text-white font-semibold text-base">{props.username} <span className={`${props.verified ? "text-green-300" : "text-orange-200"} ml-5 text-xs font-medium mt-1`}>{props.verified ? "verified" : "unverified"}</span></h3>
+                        <p className="text-gray-400 mb-1 text-xs">12:34 Thursday, 12 October 2023 <span className="text-orange-500 ml-5 text-xs font-medium mt-1">{props.type}</span></p>
                     </div>
                 </div>
                 {/* Optional image */}
-                {props.image && (
-                    <div className="flex justify-center bg-gray-100 dark:bg-gray-800">
-                        <img src={props.image} alt="Report" className="rounded-lg max-h-48 object-cover border border-gray-200 dark:border-gray-700 m-4" />
+                {url && (
+                    <div className="flex justify-center bg-gray-100 w-full dark:bg-gray-800">
+                        <img src={url} alt="Report" className="rounded-lg max-h-48 w-full object-cover border border-gray-200 dark:border-gray-700 m-4" />
                     </div>
                 )}
                 {/* Content */}
@@ -118,7 +139,7 @@ export const Feed = (props) => {
                         className="flex items-center gap-1 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1 rounded transition font-medium focus:outline-none"
                     >
                         <ChatBubbleLeftEllipsisIcon className="h-5 w-5" />
-                        <span className="text-sm">{comment} Comment</span>
+                        <span className="text-sm"> Comment</span>
                     </button>
                 </div>
             </div>
@@ -145,12 +166,12 @@ export const Feed = (props) => {
                                 comments.map((c, idx) => (
                                     <div key={idx} className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                                         <div className="w-8 h-8 rounded-full bg-blue-200 dark:bg-blue-700 flex items-center justify-center font-bold text-blue-700 dark:text-blue-200">
-                                            {c.username ? c.username[0].toUpperCase() : "U"}
+                                            {c.author ? c.author[0].toUpperCase() : "U"}
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-gray-800 dark:text-gray-200">{c.username}</div>
+                                            <div className="font-semibold text-gray-800 dark:text-gray-200">{c.author}</div>
                                             <div className="text-gray-600 dark:text-gray-300 text-sm">{c.comment}</div>
-                                            <div className="text-xs text-gray-400 mt-1">{c.time ? new Date(c.time).toLocaleString() : ""}</div>
+                                            {/*<div className="text-xs text-gray-400 mt-1">{c.time ? new Date(c.time).toLocaleString() : ""}</div>*/}
                                         </div>
                                     </div>
                                 ))

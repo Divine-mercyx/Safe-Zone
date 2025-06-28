@@ -57,6 +57,7 @@ export const Signup = () => {
     const setToken = useAuthStore((state) => state.setToken);
     const navigate = useNavigate();
     const token = useAuthStore(state => state.token);
+    const setLocations = useAuthStore((state) => state.setLocation);
 
     const [addresses, setAddresses] = useState([
         { label: "", address: "", lat: null, lng: null, suggestions: [] },
@@ -184,6 +185,9 @@ export const Signup = () => {
             })),
         };
 
+        console.log(signupPayload)
+        console.log(latitude, longitude);
+
         try {
             const {data} = await axios.post(signupApi, signupPayload);
             setToken(data.token);
@@ -194,8 +198,9 @@ export const Signup = () => {
                     locationChangingApi,
                     {token, latitude, longitude},
                 );
+                setLocations(latitude, longitude);
+                navigate("/")
             }
-            navigate("/")
         } catch (error) {
             if (error.response) {
                 console.error("Backend error:", error.response.data);
@@ -205,7 +210,7 @@ export const Signup = () => {
                 alert("Signup failed. Please try again.");
             }
         } finally {
-            setLoading(false); // Stop loader
+            setLoading(false);
         }
     };
 
