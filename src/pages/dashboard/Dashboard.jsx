@@ -157,7 +157,7 @@ export const Dashboard = () => {
                     <span className="bg-gray-800 rounded-full p-2">
                         <UserIcon className="h-8 w-8 text-blue-400" />
                     </span>
-                    <span className="text-white font-extrabold text-2xl tracking-wide">SafeSpace</span>
+                    <span className="text-white font-extrabold text-2xl tracking-wide">Safe Zone</span>
                 </div>
                 <nav className="flex-1 px-4 flex flex-col gap-3">
                     <div>
